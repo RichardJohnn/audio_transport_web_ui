@@ -27,12 +27,18 @@ function App() {
     formData.append("file", file2);
     formData.append('start', minVal);
     formData.append('end', maxVal);
-    console.log("file1", formData);
-    console.log("start", minVal);
-    console.log("end", maxVal);
+
     var request = new XMLHttpRequest();
     request.open("POST", "http://192.168.0.109:9000/upload", true);
     request.responseType = 'blob';
+
+    request.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        var percentage = (e.loaded / e.total) * 100;
+        $('div.progress div.bar').css('width', percentage + '%');
+      }
+    };
+
     request.onload = function (ev) {
       if (request.status === 200) {
         console.log('upload success');
