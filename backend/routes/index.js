@@ -16,9 +16,8 @@ router.post('/upload', async function(req, res) {
     return;
   }
 
-  console.log('req.files >>>', req.files); // eslint-disable-line
-
-  const {file1, file2} = req.files;
+  const [file1, file2] = req.files.file;
+  const {start, end} = req.body;
 
   const path1 = __dirname + '/uploads/' + file1.name.replace(/(\s+)/g, '\\$1')
   console.log("path1", path1);
@@ -30,7 +29,8 @@ router.post('/upload', async function(req, res) {
   const exec = require('child_process').exec;
 
   const outputPath = __dirname + '/uploads/output.wav'
-  const command = `transport ${path1} ${path2} 25 75 ${outputPath}`;
+  const command = `transport ${path1} ${path2} ${start} ${end} ${outputPath}`;
+  console.log("command:", command);
 
   function execute(command){
     return new Promise(function(resolve, reject) {
