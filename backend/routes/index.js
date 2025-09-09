@@ -1,3 +1,5 @@
+const path = require('path');
+const exec = require('child_process').exec;
 var express = require('express');
 var router = express.Router();
 
@@ -12,44 +14,42 @@ router.get('/ping', function(req, res) {
 
 router.post('/upload', async function(req, res) {
   if (!req.files || Object.keys(req.files).length === 0) {
-    res.status(400).send('No files were uploaded.');
-    return;
+    return res.status(400).send('No files were uploaded.');
   }
 
   const [file1, file2] = req.files.file;
   const {start, end} = req.body;
 
-  const path1 = __dirname + '/uploads/' + file1.name.replace(/(\s+)/g, '\\$1')
-  console.log("path1", path1);
-  await file1.mv(path1)
-  const path2 = __dirname + '/uploads/' + file2.name.replace(/(\s+)/g, '\\$1')
-  console.log("path2", path2);
-  await file2.mv(path2)
+  const uploadDir = path.join(__dirname, 'uploads');
 
-  const exec = require('child_process').exec;
+  const path1 = path.join(uploadDir, file1.name);
+  await file1.mv(path1);
 
-  const outputPath = __dirname + '/uploads/output.wav'
-  const command = `transport ${path1} ${path2} ${start} ${end} ${outputPath}`;
-  console.log("command:", command);
+  const path2 = path.join(uploadDir, file2.name);
+  await file2.mv(path2);
 
-  function execute(command){
-    return new Promise(function(resolve, reject) {
-      exec(command, function(error, stdout, stderr) {
-        if (error !==  null) {
+  const outputPath = path.join(uploadDir, 'output.wav');
+
+  // Quote paths to handle spaces or special characters
+  const command = `transport "${path1}" "${path2}" ${start} ${end} "${outputPath}"`;
+  console.log('command:', command);
+
+  function execute(command) {
+    return new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
           console.log(stderr);
-          reject(error);
+          return reject(error);
         }
-        resolve(stdout)
+        resolve(stdout);
       });
     });
-  };
+  }
 
   const result = await execute(command);
-  console.log("result", result);
-  res.download(outputPath)
+  console.log('result', result);
 
-  //return res.status(500).send(err);
-  //res.send('File uploaded to ' + uploadPath);
+  res.download(outputPath);
 });
 
 

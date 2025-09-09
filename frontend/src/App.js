@@ -1,6 +1,5 @@
 import React, { /*useCallback, useMemo, useRef,*/ useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
-import RangeSlider from "./rangeSlider";
 
 import './App.css';
 
@@ -29,7 +28,7 @@ function App() {
     formData.append('end', maxVal);
 
     var request = new XMLHttpRequest();
-    request.open("POST", "http://192.168.0.109:9000/upload", true);
+    request.open("POST", "/upload", true);
     request.responseType = 'blob';
 
     request.upload.onprogress = function(e) {
@@ -76,7 +75,26 @@ function App() {
             types={fileTypes}
           />
         <p>{file2 ? file2.name : "no files uploaded yet"}</p>
-        <RangeSlider min={0} max={100} thumbsize={15} setter={setValues} classes="additional-css-classes" />
+        <div>
+          <label>Start: {minVal}</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={minVal}
+            onChange={(e) => setMinVal(Number(e.target.value))}
+          />
+        </div>
+        <div>
+          <label>End: {maxVal}</label>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={maxVal}
+            onChange={(e) => setMaxVal(Number(e.target.value))}
+          />
+        </div>
 
         <button onClick={() => upload()}>Upload</button>
 
